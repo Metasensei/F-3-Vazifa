@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CRUD with Session Storage</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        text-align: center;
+        color: #1a73e8;
+      }
+      form {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin: 10px 0 5px;
+      }
+      input {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {
+        padding: 10px 15px;
+        margin-right: 10px;
+        border: none;
+        background: #1a73e8;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button.delete {
+        background: #f56a79;
+      }
+      button.edit {
+        background: #ffa500;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #1a73e8;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>CRUD App</h1>
+      <form id="dataForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" required />
+
+        <label for="phone">Phone:</label>
+        <input type="text" id="phone" required />
+
+        <label for="job">Job:</label>
+        <input type="text" id="job" required />
+
+        <button type="submit">Add</button>
+      </form>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Job</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="dataList"></tbody>
+      </table>
+    </div>
+    <script>
+      const form = document.getElementById("dataForm");
+      const dataList = document.getElementById("dataList");
+
+      let editIndex = null;
+
+      // Load data from sessionStorage
+      function loadData() {
+        const data = JSON.parse(sessionStorage.getItem("crudData")) || [];
+        dataList.innerHTML = "";
+        data.forEach((item, index) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${item.name}</td>
+            <td>${item.phone}</td>
+            <td>${item.job}</td>
+            <td>
+                <button class="edit" onclick="editData(${index})">Edit</button>
+                <button class="delete" onclick="deleteData(${index})">Delete</button>
+            </td>
+        `;
+          dataList.appendChild(row);
+        });
+      }
+
+      // Save data to sessionStorage
+      function saveData(data) {
+        sessionStorage.setItem("crudData", JSON.stringify(data));
+      }
+
+      // Add or update data
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = document.getElementById("name").value;
+        const phone = document.getElementById("phone").value;
+        const job = document.getElementById("job").value;
+
+        const data = JSON.parse(sessionStorage.getItem("crudData")) || [];
+
+        if (editIndex !== null) {
+          data[editIndex] = { name, phone, job };
+          editIndex = null;
+        } else {
+          data.push({ name, phone, job });
+        }
+        saveData(data);
+        loadData();
+        form.reset();
+      });
+
+      // Edit data
+      function editData(index) {
+        const data = JSON.parse(sessionStorage.getItem("crudData"));
+        document.getElementById("name").value = data[index].name;
+        document.getElementById("phone").value = data[index].phone;
+        document.getElementById("job").value = data[index].job;
+        editIndex = index;
+      }
+
+      // Delete data
+      function deleteData(index) {
+        const data = JSON.parse(sessionStorage.getItem("crudData"));
+        data.splice(index, 1);
+        saveData(data);
+        loadData();
+      }
+
+      // Initialize
+      loadData();
+    </script>
+  </body>
+</html>
